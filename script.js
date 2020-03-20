@@ -26,6 +26,12 @@ const diskAA = [
 
 let cursorPos;
 
+let turn;
+
+const diskNames = [
+  '黒',
+  '白'
+];
 
 //1-3 関数の定義
 function init() {
@@ -45,6 +51,8 @@ function init() {
   board[4][4] = diskColor.light;
 
   cursorPos = new Vec2(0, 0);
+
+  turn = diskColor.dark;
 
   //2-3 描画処理
   draw();
@@ -73,6 +81,9 @@ function draw() {
 
   //3-3 メッセージ処理
   if (true) {
+    message +=
+      `${diskNames[turn]}のターンです。<br>`
+
     message += `<br>
       [w, s, a, d]:カーソル移動<br>
       [その他のキー]:石を置く`;
