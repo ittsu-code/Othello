@@ -24,7 +24,7 @@ const diskAA = [
   '・'
 ];
 
-
+let cursorPos;
 
 
 //1-3 関数の定義
@@ -44,9 +44,11 @@ function init() {
   board[3][3] = diskColor.light;
   board[4][4] = diskColor.light;
 
+  cursorPos = new Vec2(0, 0);
 
   //2-3 描画処理
   draw();
+  window.onkeydown = onKeyDown
 
 }
 
@@ -57,8 +59,17 @@ function draw() {
   for (let i = 0; i < boardSize.y; i++) {
     for (let j = 0; j < boardSize.x; j++)
       html += diskAA[board[i][j]];
+    if (i === cursorPos.y)
+      html += '←';
+
     html += '<br>';
   }
+
+  for (let i = 0; i < boardSize.x; i++)
+    html += (i === cursorPos.x)
+      ? '↑'
+      : '　';
+  html += '<br>';
 
   //3-3 メッセージ処理
   if (true) {
@@ -73,7 +84,24 @@ function draw() {
   div.innerHTML = html;
 }
 
+function onKeyDown(e) {
+  message = '';
+
+  switch (e.key) {
+    case 'w': cursorPos.y--; break;
+    case 's': cursorPos.y++; break;
+    case 'a': cursorPos.x--; break;
+    case 'd': cursorPos.x++; break;
+    default:
+  }
+
+  if (cursorPos.x < 0) cursorPos.x += boardSize.x;
+  if (cursorPos.x >= boardSize.x) cursorPos.x -= boardSize.x;
+  if (cursorPos.y < 0) cursorPos.y += boardSize.y;
+  if (cursorPos.y >= boardSize.y) cursorPos.y -= boardSize.y;
+
+  draw();
+}
+
 //4 関数の呼び出し
 init();
-
-
