@@ -1,6 +1,5 @@
-"use strict"; //strict
+"use strict";
 
-//1-1 クラスの定義
 class Vec2 {
   constructor(x, y) {
     this.x = x;
@@ -8,7 +7,6 @@ class Vec2 {
   }
 }
 
-//1-2 変数・定数の定義
 let message;
 let board;
 const boardSize = new Vec2(8, 8)
@@ -33,9 +31,7 @@ const diskNames = [
   '白'
 ];
 
-//1-3 関数の定義
 function init() {
-  //2-1 盤面の形成
   board = [];
   for (let i = 0; i < boardSize.y; i++) {
     board[i] = [];
@@ -43,7 +39,6 @@ function init() {
       board[i][j] = diskColor.none;
   }
 
-  //2-2 ゲームの初期化
   message = '';
   board[3][4] = diskColor.dark;
   board[4][3] = diskColor.dark;
@@ -54,16 +49,13 @@ function init() {
 
   turn = diskColor.dark;
 
-  //2-3 描画処理
   draw();
   window.onkeydown = onKeyDown
 
 }
 
 function draw() {
-  //3-1 描画前の処理
   let html = '';
-  //3-2 盤面の描画
   for (let i = 0; i < boardSize.y; i++) {
     for (let j = 0; j < boardSize.x; j++)
       html += diskAA[board[i][j]];
@@ -79,17 +71,16 @@ function draw() {
       : '　';
   html += '<br>';
 
-  //3-3 メッセージ処理
-  if (true) {
+  if (!isGameEnd()) {
     message +=
       `${diskNames[turn]}のターンです。<br>`
 
     message += `<br>
       [w, s, a, d]:カーソル移動<br>
       [その他のキー]:石を置く`;
-  } else;
+  } else
+    message += '何かキーを押して下さい。';
 
-  //3-4 HTMLファイルへ出力
   html += '<br>' + message;
   let div = document.querySelector('div');
   div.innerHTML = html;
@@ -97,6 +88,11 @@ function draw() {
 
 function onKeyDown(e) {
   message = '';
+
+  if (isGameEnd()) {
+    init();
+    return;
+  }
 
   switch (e.key) {
     case 'w': cursorPos.y--; break;
@@ -123,6 +119,38 @@ function onOtherKeyDown() {
     if (!checkCanPlaceAll(turn)) {
       message = diskNames[turn]
         + 'はパスしました<br>';
+
+      if (isGameEnd()) {
+        let count = [0, 0];
+        for (let i = 0; i < boardSize.y; i++) {
+          for (let j = 0; j < boardSize.x; j++) {
+            if (board[i][j] !== diskColor.none)
+              count[board[i][j]]++;
+          }
+        }
+        message =
+          diskNames[diskColor.dark] + ':'
+          + count[diskColor.dark]
+          + ' - '
+          + diskNames[diskColor.light] + ':'
+          + count[diskColor.light]
+          + '<br>';
+
+        let winner = diskColor.none;
+        if (count[diskColor.dark] > count[diskColor.light])
+          winner = diskColor.dark;
+        else if (count[diskColor.dark] < count[diskColor.light])
+          winner = diskColor.light;
+
+        if (winner !== diskColor.none)
+          message += `${diskNames[winner]}の勝ちです。<br>`;
+        else
+          message += '引き分けです。<br>'
+        message += '<br>';
+
+        return;
+      }
+
       takeTurn();
     }
   } else
@@ -203,5 +231,17 @@ function isInBoard(v) {
     && v.y < boardSize.y;
 }
 
-//4 関数の呼び出し
+function checkCanPlaceAll(color) {
+  for (let i = 0; i < boardSize.y; i++)
+    for (let j = 0; j < boardSize.x; j++)
+      if (checkCanPlace(color, new Vec2(j, i), false))
+        return true;
+  return false;
+}
+
+function isGameEnd() {
+  return (!checkCanPlaceAll(diskColor.dark))
+    && (!checkCanPlaceAll(diskColor.light));
+}
+
 init();
