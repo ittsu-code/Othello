@@ -116,8 +116,15 @@ function onKeyDown(e) {
 
 function onOtherKeyDown() {
   if (checkCanPlace(turn, cursorPos, false)) {
+    checkCanPlace(turn, cursorPos, true);
     board[cursorPos.y][cursorPos.x] = turn;
     takeTurn();
+
+    if (!checkCanPlaceAll(turn)) {
+      message = diskNames[turn]
+        + 'はパスしました<br>';
+      takeTurn();
+    }
   } else
     message += 'そこには置けません<br>';
 }
@@ -167,9 +174,19 @@ function checkCanPlace(
 
         if (board[checkPos.y][checkPos.x] === color) {
           result = true;
-          //ひっくり返すことが特定
+
           if (reverse) {
-            //ひっくり返すかどうかの分岐
+            let reversePos = new Vec2(pos.x, pos.y)
+            while (true) {
+              reversePos.x += dir.x;
+              reversePos.y += dir.y;
+
+              if ((reversePos.x === checkPos.x)
+                && (reversePos.y === checkPos.y))
+                break;
+
+              board[reversePos.y][reversePos.x] = color;
+            }
           }
         }
       }
