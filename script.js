@@ -103,7 +103,7 @@ function onKeyDown(e) {
     case 's': cursorPos.y++; break;
     case 'a': cursorPos.x--; break;
     case 'd': cursorPos.x++; break;
-    default:
+    default: onOtherKeyDown();
   }
 
   if (cursorPos.x < 0) cursorPos.x += boardSize.x;
@@ -112,6 +112,78 @@ function onKeyDown(e) {
   if (cursorPos.y >= boardSize.y) cursorPos.y -= boardSize.y;
 
   draw();
+}
+
+function onOtherKeyDown() {
+  if (checkCanPlace(turn, cursorPos, false)) {
+    board[cursorPos.y][cursorPos.x] = turn;
+    takeTurn();
+  } else
+    message += 'そこには置けません<br>';
+}
+
+function takeTurn() {
+  if (turn === diskColor.dark)
+    turn = diskColor.light;
+  else
+    turn = diskColor.dark;
+}
+
+function checkCanPlace(
+  color,
+  pos,
+  reverse,
+) {
+  let result = false;
+  if (board[pos.y][pos.x] !== diskColor.none)
+    return false;
+
+  for (let i = -1; i <= 1; i++) {
+    for (let j = -1; j <= 1; j++) {
+      let dir = new Vec2(j, i);
+      if ((dir.x === 0) && (dir.y === 0))
+        continue;
+      let checkPos = new Vec2(
+        pos.x + dir.x,
+        pos.y + dir.y
+      );
+      if (!isInBoard(checkPos))
+        continue;
+      let opponent;
+      if (color === diskColor.dark)
+        opponent = diskColor.light;
+      else
+        opponent = diskColor.dark;
+      if (board[checkPos.y][checkPos.x] !== opponent)
+        continue;
+
+      while (true) {
+        checkPos.x += dir.x;
+        checkPos.y += dir.y;
+
+        if (!isInBoard(checkPos)) break;
+        if (board[checkPos.y][checkPos.x] === diskColor.none)
+          break;
+
+        if (board[checkPos.y][checkPos.x] === color) {
+          result = true;
+          //ひっくり返すことが特定
+          if (reverse) {
+            //ひっくり返すかどうかの分岐
+          }
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+function isInBoard(v) {
+  return v.x >= 0
+    && v.x < boardSize.x
+    && v.y >= 0
+    && v.y < boardSize.y;
 }
 
 //4 関数の呼び出し
